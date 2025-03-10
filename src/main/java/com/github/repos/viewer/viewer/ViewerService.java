@@ -30,12 +30,10 @@ public class ViewerService {
     }
 
     private Uni<GitHubApiResponse> enrichRepositoriesWithBranches(GitHubApiResponse repository) {
-        if (repository.branchesUrl() == null) {
-            log.error("Branches URL is null for repository: {}", repository.name());
+        String branchesUrl = extractBranchesUrl(repository);
+        if (branchesUrl == null)
             return Uni.createFrom().item(repository);
-        }
 
-        String branchesUrl = repository.branchesUrl().replace("{/branch}", "");
         log.info("Fetching branches from: {}", branchesUrl);
 
         return gitHubApiClient.getBranches(repository.owner().login(), repository.name())
@@ -46,5 +44,13 @@ public class ViewerService {
                         repository.fork(),
                         repository.branchesUrl()
                 ));
+    }
+
+    private String extractBranchesUrl(GitHubApiResponse repository) {
+        if (repository.branchesUrl() == null) {
+            log.error("Branches URL is null for repository: {}", repository.name());
+            return null;
+        }
+        return repository.branchesUrl().replace("{/branch}", "");
     }
 }
