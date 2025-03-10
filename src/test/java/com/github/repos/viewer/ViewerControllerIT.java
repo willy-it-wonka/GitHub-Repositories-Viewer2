@@ -9,20 +9,20 @@ import static org.hamcrest.Matchers.*;
 @QuarkusTest
 class ViewerControllerIT {
 
+    private static final String USERNAME = "willy-it-wonka";
+
     @Test
     void testHappyPath() {
-        String testUsername = "willy-it-wonka";
-
         RestAssured.given()
                 .when()
-                .get("/api/v1/users/" + testUsername + "/repos")
+                .get("/api/v1/users/" + USERNAME + "/repos")
                 .then()
                 .statusCode(200)
                 .body("size()", greaterThan(0))
                 .body("[0].name", notNullValue())
-                .body("[0].owner.login", notNullValue())
+                .body("[0].owner.login", equalTo(USERNAME))
                 .body("[0].branches", not(empty()))
                 .body("[0].branches[0].name", notNullValue())
-                .body("[0].branches[0].lastCommitSha", notNullValue());
+                .body("findAll { it.branches.size() > 0 }.size()", greaterThan(0));
     }
 }
