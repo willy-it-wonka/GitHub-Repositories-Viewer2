@@ -6,17 +6,18 @@ import com.github.repos.viewer.viewer.payload.ViewerResponse;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 @ApplicationScoped
 public class ViewerService {
 
-    @RestClient
-    GitHubApiClient gitHubApiClient;
+    private final GitHubApiClient gitHubApiClient;
+    private final ViewerMapper viewerMapper;
 
-    @Inject
-    ViewerMapper viewerMapper;
+    public ViewerService(@RestClient GitHubApiClient gitHubApiClient, ViewerMapper viewerMapper) {
+        this.gitHubApiClient = gitHubApiClient;
+        this.viewerMapper = viewerMapper;
+    }
 
     public Multi<ViewerResponse> getUserRepositories(String username) {
         return gitHubApiClient.getUserRepositories(username)
