@@ -6,9 +6,11 @@ import com.github.repos.viewer.viewer.payload.ViewerResponse;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 @ApplicationScoped
+@Slf4j
 public class ViewerService {
 
     private final GitHubApiClient gitHubApiClient;
@@ -29,12 +31,12 @@ public class ViewerService {
 
     private Uni<GitHubApiResponse> enrichRepositoriesWithBranches(GitHubApiResponse repository) {
         if (repository.branchesUrl() == null) {
-            System.err.println("Branches URL is null for repository: " + repository.name());
+            log.error("Branches URL is null for repository: {}", repository.name());
             return Uni.createFrom().item(repository);
         }
 
         String branchesUrl = repository.branchesUrl().replace("{/branch}", "");
-        System.out.println("Fetching branches from: " + branchesUrl);
+        log.info("Fetching branches from: {}", branchesUrl);
 
         return gitHubApiClient.getBranches(repository.owner().login(), repository.name())
                 .onItem().transform(branches -> new GitHubApiResponse(
